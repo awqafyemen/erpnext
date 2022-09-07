@@ -31,7 +31,7 @@ class Budget(Document):
 	def validate(self):
 		if not self.get(frappe.scrub(self.budget_against)):
 			frappe.throw(_("{0} is mandatory").format(self.budget_against))
-		self.validate_duplicate()
+		# self.validate_duplicate()
 		self.validate_accounts()
 		self.set_null_value()
 		self.validate_applicable_for()
@@ -157,7 +157,7 @@ def validate_expense_against_budget(args):
 			budget_records = frappe.db.sql(
 				"""
 				select
-					b.{budget_against_field} as budget_against, ba.budget_amount, b.monthly_distribution,
+					b.{budget_against_field} as budget_against, sum(ba.budget_amount) as budget_amount, b.monthly_distribution,
 					ifnull(b.applicable_on_material_request, 0) as for_material_request,
 					ifnull(applicable_on_purchase_order, 0) as for_purchase_order,
 					ifnull(applicable_on_booking_actual_expenses,0) as for_actual_expenses,
@@ -177,7 +177,7 @@ def validate_expense_against_budget(args):
 				as_dict=True,
 			)  # nosec
 
-			if budget_records:
+			if budget_records:		
 				validate_budget_records(args, budget_records)
 
 
